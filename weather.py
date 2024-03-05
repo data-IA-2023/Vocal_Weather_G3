@@ -1,7 +1,10 @@
 import json
 from flask import Flask, render_template, request, abort, Response
 import urllib
+from dotenv import load_dotenv
+import os
 
+load_dotenv('.env')
 app = Flask(__name__)
 
 
@@ -13,7 +16,7 @@ def get_weather():
     
     data = {}
     data['q'] = city
-    data['appid'] = 'bb6143fe4e36b6f74f55e36b8e49f14a'
+    data['appid'] = os.environ['METEOKEY']
     data['units'] = 'metric'
     
     url_values = urllib.parse.urlencode(data)
