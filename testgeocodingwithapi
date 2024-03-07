@@ -1,0 +1,45 @@
+from geopy.geocoders import Nominatim
+from sys import argv
+import requests
+
+def city_to_coordinates(city):
+    # Define the name of your app (for external service monitoring)
+    geolocator = Nominatim(user_agent="vocal_weather_app")
+    
+    # Send the user's city to geocode service
+    location = geolocator.geocode(city)
+    
+    if location:
+        # Extract latitude and longitude
+        lat = location.latitude
+        lon = location.longitude
+        
+        # Call the function to fetch weather data
+        weather_data = get_weather_forecast(lat, lon)
+        return weather_data
+    else:
+        print("Location not found.")
+        return None
+
+def get_weather_forecast(lat, lon):
+    # Define your weather API endpoint and API key
+    api_key = '6a037e060ada329218ba0e4ce4f92722' 
+    url = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}'
+    
+    # Fetch weather data from the API
+    response = requests.get(url)
+    if response.status_code == 200:
+        weather_data = response.json()
+        return weather_data
+    else:
+        print("Error fetching weather data.")
+        return None
+
+if __name__ == "__main__":
+    if len(argv) > 1:
+        city = argv[1]
+        weather_data = city_to_coordinates(city)
+        if weather_data:
+            print("Weather Forecast:", weather_data)
+    else:
+        print("Please provide a city name as a command-line argument.")
