@@ -16,11 +16,15 @@ def extraire_ville_et_date(phrase):
     date = None
 
     for ent in doc.ents:
-        print(ent.text)
+        # print(ent.text, ent.label_)
         if ent.label_ in ["LOC", "GPE"]:
             ville = ent.text
+        elif ent.label_ == "DATE":
+            date = ent.text.lower().strftime("%Y-%m-%d")
+
     
     for token in doc:
+        # print(token.text, token.ent_type_)
         if token.ent_type_ == "DATE":
             date = token.text.lower().strftime("%Y-%m-%d")
         elif token.text.lower() == "demain":
@@ -32,8 +36,12 @@ def extraire_ville_et_date(phrase):
         elif (token.text.lower() == "avant-hier"):
             date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
         elif token.text.lower() == "hier":
-            date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")  
-            
+            date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    if not date:
+        date = dateparser.parse(phrase.lower(), languages=['fr','en', 'es'])
+        if isinstance(date, datetime):
+            date = date.strftime("%Y-%m-%d")  
 
     if not date:
         date = datefinder(phrase)
@@ -93,5 +101,6 @@ def main(phrase):
         return {"error": "Ville ou date manquante"}
 
 # Exemple d'utilisation
-phrase_test = "Quel temps fait-il à New York demain ?"
-main(phrase_test)
+if __name__== "__main__":
+    phrase_test = "Quel temps fait-il à New york a la date 30 avril 2024 ?"
+    main(phrase_test)

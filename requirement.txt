@@ -18,3 +18,4 @@ requests
 azure-cognitiveservices-speech
 dateparser
 spacy
+geopy
