@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import dateparser
 from dotenv import load_dotenv
 import os
+import datefinder
 
 load_dotenv('.env')
 # Charger le modèle de langue français de SpaCy
@@ -38,19 +39,25 @@ def extraire_ville_et_date(phrase):
         elif token.text.lower() == "hier":
             date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
+    # if not date:
+    #     date = dateparser.parse(phrase.lower(), languages=['fr','en', 'es'])
+    #     if isinstance(date, datetime):
+    #         date = date.strftime("%Y-%m-%d")  
+    
     if not date:
-        date = dateparser.parse(phrase.lower(), languages=['fr','en', 'es'])
-        if isinstance(date, datetime):
-            date = date.strftime("%Y-%m-%d")  
+        dates_trouvees = datefinder.find_dates(phrase.lower())
+        premiere_date = next(dates_trouvees, None)
+        if premiere_date:
+            date = premiere_date.strftime("%Y-%m-%d")
 
     if not date:
-        date = datefinder(phrase)
-
-
+        date = recherchedate(phrase)
+        if date:
+            date = date.strftime("%Y-%m-%d")
 
     return ville, date
 
-def datefinder(sentence):
+def recherchedate(sentence):
 
     # Expression régulière pour extraire la date
     date_pattern = r"\b(\d{1,2} (?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) \d{4})\b"
@@ -102,5 +109,5 @@ def main(phrase):
 
 # Exemple d'utilisation
 if __name__== "__main__":
-    phrase_test = "Quel temps fait-il à New york a la date 30 avril 2024 ?"
+    phrase_test = "Quel temps fait-il à New york le 10 mars ?"
     main(phrase_test)

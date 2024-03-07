@@ -19,3 +19,4 @@ azure-cognitiveservices-speech
 dateparser
 spacy
 geopy
+datefinder
