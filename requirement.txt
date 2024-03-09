@@ -20,3 +20,4 @@ dateparser
 spacy
 geopy
 datefinder
+transformers
