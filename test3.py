@@ -39,7 +39,7 @@ def trouver_correspondance(expression_temporelle):
     return meilleure_correspondance
 
 # Exemple d'utilisation
-texte = "Demian, c'est demin, hiers, avan-hier, et après demain c'est après-démain."
+texte = "le meteo  aprés demain a Joué les Tours"
 doc = nlp(texte)
 
 # Parcourir les jetons (tokens) pour trouver les expressions temporelles

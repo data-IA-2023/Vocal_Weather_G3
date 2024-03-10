@@ -26,23 +26,50 @@
         </style>
     </head>
     <body>
-        <table>
-            <tr>
-                <th>Time</th>
-                <th>Temperature</th>
-                <th>Humidity</th>
-                <th>Weather</th>
-                <th>Wind</th>
-            </tr>
-            {% for item in data["list"] %}
+        <h1>Reconnaissance Vocale</h1>
+        <form action="/speech-to-text" method="post">
+            <button type="submit">
+                <img src="https://img.icons8.com/material/24/000000/microphone--v1.png"/>
+            </button>
+        </form>
+        {% if result %}
+            
+            <form action="/decode" method="GET">
+                <textarea id="textarea" name="speech_text" >{{ result }}</textarea>
+                <button type="submit">Voir Forecast</button>
+            </form>
+        
+
+        {% endif %}
+        {% if ville %}
+            <form action="/forecast" method="GET">
+                <h1>{{ ville }}</h1>
+                <input type="hidden" name="city" value="{{ ville }}">
+                <button type="submit">Voir Forecast</button>
+            </form>
+        {% endif %}
+
+
+
+        {% if data %}
+            <table>
                 <tr>
-                    <td>{{ item["dt_txt"] }}</td>
-                    <td>{{ item["main"]["temp"] }}°C</td>
-                    <td>{{ item["main"]["humidity"] }}%</td>
-                    <td><div id="weather"><img src="https://openweathermap.org/img/wn/{{ item["weather"][0]["icon"] }}.png"></img> {{ item["weather"][0]["main"] }}</div></td>
-                    <td>{{ '%.2f' % (item["wind"]["speed"]*3.6) }} km/h ({{ item["wind"]["deg"] }} deg)</td>
+                    <th>Time</th>
+                    <th>Temperature</th>
+                    <th>Humidity</th>
+                    <th>Weather</th>
+                    <th>Wind</th>
                 </tr>
-            {% endfor %}
-        </table>
+                {% for item in data["list"] %}
+                    <tr>
+                        <td>{{ item["dt_txt"] }}</td>
+                        <td>{{ item["main"]["temp"] }}°C</td>
+                        <td>{{ item["main"]["humidity"] }}%</td>
+                        <td><div id="weather"><img src="https://openweathermap.org/img/wn/{{ item["weather"][0]["icon"] }}.png"></img> {{ item["weather"][0]["main"] }}</div></td>
+                        <td>{{ '%.2f' % (item["wind"]["speed"]*3.6) }} km/h ({{ item["wind"]["deg"] }} deg)</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
     </body>
 </html>
