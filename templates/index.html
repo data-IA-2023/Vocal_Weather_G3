@@ -43,8 +43,9 @@
         {% endif %}
         {% if ville %}
             <form action="/forecast" method="GET">
-                <h1>{{ ville }}</h1>
-                <input type="hidden" name="city" value="{{ ville }}">
+                <h1>La météo à {{ ville }} le {{date}} :</h1>
+                <input type="hidden" name="ville" value="{{ ville }}">
+                <input type="hidden" name="date" value="{{ date }}">
                 <button type="submit">Voir Forecast</button>
             </form>
         {% endif %}
@@ -52,6 +53,7 @@
 
 
         {% if data %}
+        <h1>{{ titre }}</h1>
             <table>
                 <tr>
                     <th>Time</th>
