@@ -40,7 +40,7 @@ def get_weather():
     
     resp = Response(response)
     resp.status_code = 200
-    titre= f'La météo à {city} le {date_str} est'
+    titre= f'La météo à {city} le {date_str} est:'
     return render_template('index.html', titre=titre, data=json.loads(response.read().decode('utf8')))
 
 @app.route('/speech-to-text', methods=['post'])
