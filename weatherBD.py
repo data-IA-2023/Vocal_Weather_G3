@@ -1,9 +1,15 @@
 import pyodbc
+from dotenv import load_dotenv
+import os
 
-SERVER = 'serveurbdg7.database.windows.net,1433'
-DATABASE = 'vocal_weather'
-USERNAME = 'mohammed'
-PASSWORD = 'password@123'
+load_dotenv('.env')
+
+SERVER = os.environ['SERVER']
+DATABASE = os.environ['DATABASE']
+USERNAME = os.environ['USERNAME']
+PASSWORD = os.environ['PASSWORD']
+
+
 
 connectionString = f'DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={SERVER};DATABASE={DATABASE};UID={USERNAME};PWD={PASSWORD}'
 conn = pyodbc.connect(connectionString) 
@@ -19,3 +25,6 @@ cursor.execute(SQL_QUERY)
 records = cursor.fetchall()
 for r in records:
     print(f"LIGNE: {r}")
+
+cursor.close()
+conn.close()
