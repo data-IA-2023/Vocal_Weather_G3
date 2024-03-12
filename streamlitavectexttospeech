@@ -1,0 +1,140 @@
+#test streamlit with speechtotext
+import streamlit as st
+import re
+import requests
+import dateparser
+import os
+import spacy
+import matplotlib.pyplot as plt
+import pandas as pd
+from dotenv import load_dotenv
+import azure.cognitiveservices.speech as speechsdk
+
+
+nlp = spacy.load("en_core_web_sm")
+
+load_dotenv('.env')
+SPEECH_KEY = os.environ['SPEECH_KEY']
+SPEECH_REGION = os.environ['SPEECH_REGION']
+SPEECH_LANGUAGE = os.environ['SPEECH_LANGUAGE']
+
+def extract_entities(text):
+    # Process the input text using spaCy
+    doc = nlp(text)
+    city = None
+    date = None
+    
+    # Iterate through named entities recognized by spaCy
+    for entity in doc.ents:
+        if entity.label_ == 'GPE':  # Geo-Political Entity (City, Country, etc.)
+            city = entity.text
+        elif entity.label_ == 'DATE':  # Date entity
+            date_str = entity.text
+            parsed_date = dateparser.parse(date_str)
+            if parsed_date:
+                date = parsed_date.strftime("%Y-%m-%d")
+
+    return city, date
+
+def get_weather_forecast(city):
+    api_key = "a9769335750f4ac2c0fac2377547d1cd"
+    url = f'https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}'
+
+    response = requests.get(url)
+    
+    # Checking the API response
+    if response.status_code == 200:
+        weather_data = response.json()
+        return weather_data
+    else:
+        return {"error": "Failed to obtain weather data"}
+
+def recognize_from_microphone():
+    # Set up speech configuration
+    speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
+    speech_config.speech_recognition_language = SPEECH_LANGUAGE
+
+    audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+
+    print("Speak into your microphone.")
+    speech_recognition_result = speech_recognizer.recognize_once_async().get()
+
+    if speech_recognition_result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        return speech_recognition_result.text
+    elif speech_recognition_result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(speech_recognition_result.no_match_details))
+    elif speech_recognition_result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = speech_recognition_result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+            print("Did you set the speech resource key and region values?")
+
+def main():
+    st.title("Weather Forecast App")
+    
+    # Sidebar with options
+    st.sidebar.title("Options")
+    unit = st.sidebar.selectbox("Temperature Unit", ["Celsius", "Fahrenheit", "Kelvin"])
+    
+    # Use microphone input or text input
+    use_microphone = st.sidebar.checkbox("Use Microphone Input")
+    
+    if use_microphone:
+        speech_text = recognize_from_microphone()
+        if speech_text is not None:  # Check if speech_text is not None
+            st.write("Recognized Speech:", speech_text)
+            if st.button("Get Weather Forecast"):
+                city, _ = extract_entities(speech_text)
+                if city:
+                    weather_info = get_weather_forecast(city)
+                    if "error" in weather_info:
+                        st.error(weather_info["error"])
+                    else:
+                        st.success(f"Weather forecast for {city}:")
+                        plot_weather_forecast(weather_info, unit)
+                else:
+                    st.warning("Unable to detect city in the speech.")
+        else:
+            st.warning("No speech detected.")
+    else:
+        text_input = st.text_input("Enter your query:")
+        speech_text = text_input
+        if st.button("Get Weather Forecast"):
+            city, _ = extract_entities(speech_text)
+            if city:
+                weather_info = get_weather_forecast(city)
+                if "error" in weather_info:
+                    st.error(weather_info["error"])
+                else:
+                    st.success(f"Weather forecast for {city}:")
+                    plot_weather_forecast(weather_info, unit)
+            else:
+                st.warning("Unable to detect city in the text.")
+
+def plot_weather_forecast(weather_data, unit):
+    timestamps = [pd.to_datetime(hour['dt_txt']) for hour in weather_data['list']]
+    temperatures = [hour['main']['temp'] for hour in weather_data['list']]
+    
+    if unit == "Celsius":
+        temperatures = [temp - 273.15 for temp in temperatures]
+        unit_label = "Temperature (°C)"
+    elif unit == "Fahrenheit":
+        temperatures = [(temp - 273.15) * 9/5 + 32 for temp in temperatures]
+        unit_label = "Temperature (°F)"
+    else:
+        unit_label = "Temperature (K)"
+    
+    df = pd.DataFrame({'Timestamp': timestamps, unit_label: temperatures})
+    plt.figure(figsize=(10, 6))
+    plt.plot(df['Timestamp'], df[unit_label])
+    plt.xlabel('Timestamp')
+    plt.ylabel(unit_label)
+    plt.title('Weather Forecast')
+    st.pyplot(plt)
+
+# Example usage
+if __name__ == "__main__":
+    main()
+
