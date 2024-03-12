@@ -52,26 +52,9 @@
 
 
 
-        {% if data %}
+        {% if titre %}
         <h1>{{ titre }}</h1>
-            <table>
-                <tr>
-                    <th>Time</th>
-                    <th>Temperature</th>
-                    <th>Humidity</th>
-                    <th>Weather</th>
-                    <th>Wind</th>
-                </tr>
-                {% for item in data["data"] %}
-                    <tr>
-                        <td>{{ item["dt"] }}</td>
-                        <td>{{ item["temp"] }}°C</td>
-                        <td>{{ item["humidity"] }}%</td>
-                        <td><div id="weather"><img src="https://openweathermap.org/img/wn/{{ item["weather"][0]["icon"] }}.png"></img> {{ item["weather"][0]["main"] }}</div></td>
-                        <td>{{ '%.2f' % (item["wind_speed"]*3.6) }} km/h ({{ item["wind_deg"] }} deg)</td>
-                    </tr>
-                {% endfor %}
-            </table>
+        {{ table | safe }}
         {% endif %}
     </body>
 </html>

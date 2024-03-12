@@ -3,14 +3,17 @@ from flask import Flask, render_template, request, abort, Response
 import urllib
 from dotenv import load_dotenv
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from voice import recognize_from_microphone
 from camembert import NLP
 from geocoding import city_to_coordinates
-
+from apimeteo import apimeteo
+from weatherBD import connectBd, inserer_donnees_surveillance
 
 load_dotenv('.env')
+conn=connectBd()
+    
 app = Flask(__name__)
 
 
@@ -19,39 +22,36 @@ def get_weather():
     city = request.args.get('ville')
     date_str = request.args.get('date')
     
+    inserer_donnees_surveillance(conn,'forecast', 'resultat', 200)
+    
     if city is None or date_str is None:
         abort(400, 'Missing argument city or date')
-    
+        
     try:
         date = datetime.strptime(date_str, '%Y-%m-%d')
     except ValueError:
         abort(400, 'Invalid date format. Please use YYYY-MM-DD')
     
     data = {}
-    # data['q'] = city
-    location=city_to_coordinates(city)
-    data['lat'] = location['lat']  
-    data['lon'] = location['lon']   
-    data['appid'] = os.environ['METEOKEY']
-    data['units'] = 'metric'
-    data['lang'] = 'fr'
-    data['dt'] = int(date.timestamp())  # Convert date to Unix timestamp
+    location = city_to_coordinates(city)
+    if location is None:
+        abort(400, 'Invalid city')
     
-    url_values = urllib.parse.urlencode(data)
-    url = 'https://api.openweathermap.org/data/3.0/onecall/timemachine'
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+    
+    date_demain_str = date_str #temp pour le test
+    
+    # date_demain = date_obj + timedelta(days=1)
+    # date_demain_str = date_demain.strftime("%Y-%m-%d")
 
-    full_url = url + '?' + url_values
-    print(full_url)
-    response = urllib.request.urlopen(full_url)
-    
-    resp = Response(response)
-    resp.status_code = 200
+    df=apimeteo(lat=location['lat'],lon=location['lon'],start_date=date_str,end_date=date_demain_str)
+    table = df.to_html(index=False)
     titre= f'La météo à {city} le {date_str} est:'
-    datajson=json.loads(response.read().decode('utf8'))
-  
-    datajson["data"][0]["dt"] = datetime.fromtimestamp(datajson["data"][0]["dt"]) # Convert date a au format normal
-    print(datajson)
-    return render_template('index.html', titre=titre, data=datajson)
+
+    return render_template('index2.html', titre=titre, table=table)
+
+
+
 
 @app.route('/speech-to-text', methods=['post'])
 def speechToText():

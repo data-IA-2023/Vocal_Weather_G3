@@ -39,10 +39,6 @@ def extraire_ville_et_date(phrase):
         elif token.text.lower() == "hier":
             date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
-    # if not date:
-    #     date = dateparser.parse(phrase.lower(), languages=['fr','en', 'es'])
-    #     if isinstance(date, datetime):
-    #         date = date.strftime("%Y-%m-%d")  
     
     if not date:
         dates_trouvees = datefinder.find_dates(phrase.lower())
