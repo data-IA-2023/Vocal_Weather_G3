@@ -11,10 +11,12 @@ from geocoding import city_to_coordinates
 from apimeteo import apimeteo
 from surveillance import connectBd, inserer_donnees_surveillance
 
-load_dotenv('.env')
-conn=connectBd()
+
     
 app = Flask(__name__)
+
+load_dotenv('.env')
+conn=connectBd()
 
 
 @app.route('/forecast', methods=['GET'])

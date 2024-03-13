@@ -35,7 +35,7 @@ def inserer_donnees_surveillance(conn, fonction, resultat, erreur):
         
 
 
-def surveillance(fonction, resultat, erreur):
+def surveillanceAllInOne(fonction, resultat, erreur):
     
     try:
     
