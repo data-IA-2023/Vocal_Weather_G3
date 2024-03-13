@@ -22,16 +22,21 @@ def get_weather():
     city = request.args.get('ville')
     date_str = request.args.get('date')
     
-    
-    
+
     if city is None or date_str is None:
         inserer_donnees_surveillance(conn,'forecast_Arg', 'Missing argument city or date', 400)
         abort(400, 'Missing argument city or date')
     else:
         inserer_donnees_surveillance(conn,'forecast_Arg', f'city : {city} and date : {date_str}', 200)
     
-   
-    location = city_to_coordinates(city)
+
+    try:
+        location = city_to_coordinates(city)
+    except Exception as e:
+        inserer_donnees_surveillance(conn,'geocoding', f'Geacoding API erreur :{city}', e)
+        abort(400, 'Geacoding API erreur')
+    
+ 
     if location is None:
         inserer_donnees_surveillance(conn,'geocoding', f'Invalid city :{city}', 400)
         abort(400, 'Invalid city')
@@ -71,6 +76,8 @@ def speechToText():
         inserer_donnees_surveillance(conn,'speechToText', result, 200)
     
     return render_template('index.html', result = result)
+
+
 
 @app.route('/decode', methods=['GET'])
 def decode():
