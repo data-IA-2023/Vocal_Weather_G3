@@ -37,7 +37,7 @@ def get_weather():
     try:
         location = city_to_coordinates(city)
     except Exception as e:
-        inserer_donnees_surveillance(conn,'geocoding', f'Geacoding API erreur :{city}', e)
+        inserer_donnees_surveillance(conn,'geocoding', f'Geacoding API erreur :{city}', 400)
         abort(400, 'Geacoding API erreur')
     
  
@@ -61,6 +61,8 @@ def get_weather():
         fig = px.line(df, x='date', y=['temperature_2m', 'precipitation'],
                 labels={'temperature': 'Température (°C)', 'precipitation': 'Précipitation (mm)'},
                 title=f"météo à {city} le {date_str}")
+        
+        
         graph_html = fig.to_html(full_html=False)
         
     except Exception as e:
@@ -101,7 +103,7 @@ def decode():
         ville = data['ville'][0]
         date = data['date'][0]
     except Exception as e:
-        inserer_donnees_surveillance(conn,'NLP', f'NLP api can not process this :{phrase}', e)
+        inserer_donnees_surveillance(conn,'NLP', f'NLP api can not process this :{phrase}', 400)
         abort(400, 'Missing city or date')
         
     if ville is None or date is None:
