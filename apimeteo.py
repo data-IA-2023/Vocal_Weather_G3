@@ -53,7 +53,7 @@ def apimeteo(lat=52.52,lon=13.41,start_date='2024-03-12',end_date='2024-03-14'):
     hourly_data["wind_direction_10m"] = hourly_wind_direction_10m
 
     hourly_dataframe = pd.DataFrame(data = hourly_data)
-    print(hourly_dataframe)
+    # print(hourly_dataframe)
     return hourly_dataframe
     
 

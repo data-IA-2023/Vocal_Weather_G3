@@ -4,12 +4,14 @@ import urllib
 from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
+import plotly.express as px
 
 from voice import recognize_from_microphone
 from camembert import NLP
 from geocoding import city_to_coordinates
 from apimeteo import apimeteo
 from surveillance import connectBd, inserer_donnees_surveillance
+
 
 
     
@@ -55,14 +57,21 @@ def get_weather():
     try:
         df=apimeteo(lat=location['lat'],lon=location['lon'],start_date=date_str,end_date=date_demain_str)
         table = df.to_html(index=False)
+        
+        fig = px.line(df, x='date', y=['temperature_2m', 'precipitation'],
+                labels={'temperature': 'Température (°C)', 'precipitation': 'Précipitation (mm)'},
+                title=f"météo à {city} le {date_str}")
+        graph_html = fig.to_html(full_html=False)
+        
     except Exception as e:
         inserer_donnees_surveillance(conn,'apimeteo', f"Erreur in apiMeteo for this location lat : {location['lat']} and lon : {location['lon']}", 400)
+        abort(400, 'Erreur in apiMeteo')
     else:
         inserer_donnees_surveillance(conn,'apimeteo', f"No problemo : {location['lat']} and lon : {location['lon']}", 200)    
             
     titre= f'La météo à {city} le {date_str} est:'
 
-    return render_template('index2.html', titre=titre, table=table)
+    return render_template('index2.html', titre=titre, table=table, graph_html=graph_html, LATITUDE=location['lat'], LONGITUDE=location['lon'])
 
 
 
