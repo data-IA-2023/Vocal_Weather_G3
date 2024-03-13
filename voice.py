@@ -31,13 +31,14 @@ def recognize_from_microphone():
     
     elif speech_recognition_result.reason == speechsdk.ResultReason.NoMatch:
         print("No speech could be recognized: {}".format(speech_recognition_result.no_match_details))
-        return "No_speech"
+        return None
     elif speech_recognition_result.reason == speechsdk.ResultReason.Canceled:
         cancellation_details = speech_recognition_result.cancellation_details
         print("Speech Recognition canceled: {}".format(cancellation_details.reason))
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(cancellation_details.error_details))
             print("Did you set the speech resource key and region values?")
+        return None
 
 
 if __name__== "__main__":
