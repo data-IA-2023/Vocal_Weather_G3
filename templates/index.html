@@ -1,21 +1,48 @@
-<html>
+<!DOCTYPE html>
+<html lang="fr">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{{ title }}</title>
         <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+
+            }
+            /* Styles pour la barre de chargement */
+            .loader {
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #3498db;
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                animation: spin 1s linear infinite;
+                display: none; /* Initialement masqué */
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            /* Autres styles */
             table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
             }
 
             td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding: 8px;
             }
 
             tr:nth-child(even) {
-            background-color: #dddddd;
+                background-color: #dddddd;
             }
 
             #weather {
@@ -23,19 +50,28 @@
                 flex-direction: row;
                 align-items: center;
             }
+
+            iframe {
+                width: 100%;
+            }
         </style>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     </head>
     <body>
+        <img src="/static/icons/Logo.jpg"/>
         <h1>Reconnaissance Vocale</h1>
-        <form action="/speech-to-text" method="post">
+        <form id="speechForm" action="/speech-to-text" method="post" onsubmit="showLoader()">
+            <!-- Bouton du microphone -->
             <button type="submit">
                 <img src="https://img.icons8.com/material/24/000000/microphone--v1.png"/>
             </button>
+            <!-- Barre de chargement -->
+            <div id="loader" class="loader"></div>
         </form>
         {% if result %}
             
             <form action="/decode" method="GET">
-                <textarea id="textarea" name="speech_text" >{{ result }}</textarea>
+                <textarea id="textarea" name="speech_text">{{ result }}</textarea>
                 <button type="submit">Voir Forecast</button>
             </form>
         
@@ -50,28 +86,21 @@
             </form>
         {% endif %}
 
-
-
-        {% if data %}
+        {% if titre %}
         <h1>{{ titre }}</h1>
-            <table>
-                <tr>
-                    <th>Time</th>
-                    <th>Temperature</th>
-                    <th>Humidity</th>
-                    <th>Weather</th>
-                    <th>Wind</th>
-                </tr>
-                {% for item in data["data"] %}
-                    <tr>
-                        <td>{{ item["dt"] }}</td>
-                        <td>{{ item["temp"] }}°C</td>
-                        <td>{{ item["humidity"] }}%</td>
-                        <td><div id="weather"><img src="https://openweathermap.org/img/wn/{{ item["weather"][0]["icon"] }}.png"></img> {{ item["weather"][0]["main"] }}</div></td>
-                        <td>{{ '%.2f' % (item["wind_speed"]*3.6) }} km/h ({{ item["wind_deg"] }} deg)</td>
-                    </tr>
-                {% endfor %}
-            </table>
+
+        <div id="weatherGraph" style="width: 100%;">
+            {{ graph_html | safe }}
+        </div>
+        {{ table | safe }}
+        <iframe width="650" height="450" src="https://embed.windy.com/embed2.html?lat={{ LATITUDE }}&lon={{ LONGITUDE }}&detailLat={{ LATITUDE }}&detailLon={{ LONGITUDE }}&width=100%&height=450&zoom=30&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true&calendar=24&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
         {% endif %}
+
+        <!-- Script JavaScript pour afficher/masquer la barre de chargement -->
+        <script>
+            function showLoader() {
+                document.getElementById("loader").style.display = "inline-block"; // Afficher la barre de chargement
+            }
+        </script>
     </body>
 </html>

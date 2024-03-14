@@ -26,21 +26,21 @@ def get_weather():
     city = request.args.get('ville')
     date_str = request.args.get('date')
     
-
+    #Gestion des arguments des exceptions possibles
     if city is None or date_str is None:
         inserer_donnees_surveillance(conn,'forecast_Arg', 'Missing argument city or date', 400)
         abort(400, 'Missing argument city or date')
     else:
         inserer_donnees_surveillance(conn,'forecast_Arg', f'city : {city} and date : {date_str}', 200)
     
-
+    #geocoding
     try:
         location = city_to_coordinates(city)
     except Exception as e:
         inserer_donnees_surveillance(conn,'geocoding', f'Geacoding API erreur :{city}', 400)
         abort(400, 'Geacoding API erreur')
     
- 
+    # Gestion des exceptions de géocoding
     if location is None:
         inserer_donnees_surveillance(conn,'geocoding', f'Invalid city :{city}', 400)
         abort(400, 'Invalid city')
@@ -54,6 +54,7 @@ def get_weather():
     # date_demain = date_obj + timedelta(days=1)
     # date_demain_str = date_demain.strftime("%Y-%m-%d")
     
+    # Api Méteo
     try:
         df=apimeteo(lat=location['lat'],lon=location['lon'],start_date=date_str,end_date=date_demain_str)
         table = df.to_html(index=False)
@@ -73,14 +74,20 @@ def get_weather():
             
     titre= f'La météo à {city} le {date_str} est:'
 
-    return render_template('index2.html', titre=titre, table=table, graph_html=graph_html, LATITUDE=location['lat'], LONGITUDE=location['lon'])
+    return render_template('index.html', titre=titre, table=table, graph_html=graph_html, LATITUDE=location['lat'], LONGITUDE=location['lon'])
 
 
 
 
 @app.route('/speech-to-text', methods=['post'])
 def speechToText():
-    result= recognize_from_microphone()
+    #seech to text
+    try:
+        result= recognize_from_microphone()
+    except Exception as e:
+        inserer_donnees_surveillance(conn,'speechToText', 'Speech to text error', 400)
+        abort(400, 'Speech to text error')
+    
     
     if result is None :
         inserer_donnees_surveillance(conn,'speechToText', 'No speech could be recognized', 400)
@@ -94,7 +101,7 @@ def speechToText():
 
 @app.route('/decode', methods=['GET'])
 def decode():
-    
+    #Nlp
     try:
         phrase = request.args.get('speech_text')
         data= NLP(phrase=phrase)

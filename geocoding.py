@@ -19,7 +19,7 @@ from sys import argv
 def city_to_coordinates(city):
     
     # Define the name of your app (for external service monitoring)
-    geolocator = Nominatim(user_agent="vocal_weather_app")
+    geolocator = Nominatim(user_agent="Chatmeteo")
     
     # Send the user' city to geocode service
     location = geolocator.geocode(city)
