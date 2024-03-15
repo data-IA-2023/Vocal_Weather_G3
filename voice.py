@@ -40,7 +40,6 @@ def recognize_from_microphone():
             print("Did you set the speech resource key and region values?")
         return None
 
-
 if __name__== "__main__":
     print("Recognized",recognize_from_microphone())
 
