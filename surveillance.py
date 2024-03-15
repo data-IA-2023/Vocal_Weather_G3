@@ -25,10 +25,6 @@ def connectBd():
 
 def inserer_donnees_surveillance(conn, fonction, resultat, erreur):
     try:
-        
-        if (erreur==400):
-            envoyer_email(os.environ['TOEMAIL'], f'⚠️ Erreur in {fonction} ⚠️', f"{datetime.now()} une erreur dans la l'API : {fonction} code erreur : {erreur} .")
-        
         cursor = conn.cursor()
         query = "INSERT INTO vocal_weather.dbo.table_surveillance (date_evenement, fonction, resultat, erreur) VALUES (?, ?, ?, ?)"
         data = (datetime.now(), fonction, resultat, erreur)
@@ -36,7 +32,8 @@ def inserer_donnees_surveillance(conn, fonction, resultat, erreur):
         conn.commit()
         print("Données de surveillance insérées avec succès.")
         
-
+        if (erreur==400):
+            envoyer_email(os.environ['TOEMAIL'], f'Erreur in {fonction}', f"{datetime.now()} une erreur dans la l'API : {fonction} code erreur : {erreur} .")
     
     except Exception  as e:
         print(f"Erreur lors de l'insertion des données de surveillance: {e}")
