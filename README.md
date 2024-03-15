@@ -1,6 +1,6 @@
 # Vocal_Weather_G3
 
-lancer l'application avec flask : Chatweather.py
+lancez l'application avec flask : Chatmeteo.py
 
 
 Contexte du projet
