@@ -10,6 +10,7 @@ def apimeteo(lat=52.52,lon=13.41,start_date='2024-03-12',end_date='2024-03-14'):
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
 
+
     # Make sure all required weather variables are listed here
     # The order of variables in hourly or daily is important to assign them correctly below
     url = "https://api.open-meteo.com/v1/forecast"
