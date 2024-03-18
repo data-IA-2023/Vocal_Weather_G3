@@ -30,3 +30,4 @@ open-meteo
 retry-requests
 pyodbc
 
+
