@@ -23,4 +23,10 @@ datefinder
 transformers
 fuzzywuzzy
 python-Levenshtein
+torch
+sentencepiece
+protobuf
+open-meteo
+retry-requests
+pyodbc
 
